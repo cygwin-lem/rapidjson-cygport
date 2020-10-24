@@ -1,0 +1,140 @@
+################################
+inherit cmake ninja python3
+
+################################
+
+NAME=rapidjson
+VERSION=1.1.0p567
+RELEASE=1
+
+################################
+CATEGORY="Libs"
+SUMMARY="A fast JSON parser/generator for C++ with both SAX/DOM style API"
+DESCRIPTION="RapidJSON is a fast JSON parser/generator for C++ with both SAX/DOM style API."
+HOMEPAGE="https://rapidjson.org/"
+
+################################
+## Source from a git repository
+################################
+GIT_REPO="https://github.com/Tencent/rapidjson"
+declare -A GIT_DATEHASH_BY_NAME=(
+  # git log --date=iso-strict --format='%cd/%H' -1 v1.1.0
+  [1.1.0p567]=2020-10-13T09:54:06+08:00/0ccdbf364c577803e2a751f5aededce935314313
+  [1.1.0]=2016-08-25T15:59:05+08:00/f54b0e47a08782a6131cc3d60f94d038fa6e0a51
+)
+REV_HASH="${GIT_DATEHASH_BY_NAME[${VERSION}]#*/}"
+REV_DATE="${GIT_DATEHASH_BY_NAME[${VERSION}]%/*}"
+REV_DATE_SHORT="${GIT_DATEHASH_BY_NAME[${VERSION}]%T*}"
+GIT_BASENAME="${GIT_REPO##*/}"
+SRC_URI="${GIT_REPO}/archive/${REV_HASH}.tar.gz"   # GitHub
+#SRC_URI="${GIT_REPO}/-/archive/${REV_HASH}/${GIT_BASENAME}-${REV_HASH}.tar.bz2" # GitLab
+SRC_LOCAL=${SRC_URI##*/}
+SRC_DIR="${GIT_BASENAME}-${REV_HASH}"
+
+
+################################
+## ABI
+ABI=0
+################################
+
+################################
+## Settings for CMake
+################################
+if [ -n "${NO_NINJA}" ]; then
+  MAKEOPTS=-j1
+  CYGCMAKE_GENERATOR="Unix Makefiles"
+fi
+
+CYGCMAKE_ARGS="
+  -DCYGWIN:BOOL=ON
+  -DBUILD_SHARED_LIBS:BOOL=ON
+"
+
+################################
+## Requirements for building
+################################
+BUILD_REQUIRES="\
+  pkg-config\
+  cmake\
+  ninja\
+  doxygen\
+  python3-devel\
+  python38-devel\
+"
+
+################################
+## Patch files
+################################
+# Patch filenames are in a default style of 'git format-patch'
+PATCH_URI=$(\
+  find -maxdepth 1 -type f -name '[0-9][0-9][0-9][0-9]-*.patch' \
+  | sort \
+)
+# Additional patches, if any
+PATCH_URI+="
+"
+
+################################
+# Devel
+THIS_PN="${NAME}-devel"
+THIS_VN=${THIS_PN//[-+\.]/_}
+PKG_NAMES+=" ${THIS_PN}"
+
+printf -v "${THIS_VN}_CATEGORY" "%s" "Devel ${CATEGORY}"
+printf -v "${THIS_VN}_SUMMARY"  "%s" "${SUMMARY% *} (devel)"
+printf -v "${THIS_VN}_CONTENTS" "%s" "\
+  usr/include/\
+  usr/lib/\
+"
+printf -v "${THIS_VN}_REQUIRES" "%s" "\
+"
+
+################################
+# Doc
+THIS_PN="${NAME}-doc"
+THIS_VN=${THIS_PN//[-+\.]/_}
+PKG_NAMES+=" ${THIS_PN}"
+
+printf -v "${THIS_VN}_CATEGORY" "%s" "Doc ${CATEGORY}"
+printf -v "${THIS_VN}_SUMMARY"  "%s" "${SUMMARY% *} (doc)"
+printf -v "${THIS_VN}_CONTENTS" "%s" "\
+  usr/share/doc/\
+"
+printf -v "${THIS_VN}_REQUIRES" "%s" "\
+"
+
+################################
+# Remove jsonchecker files under the JSON License (cf. license.txt)
+DISTCLEANFILES+="
+  bin/jsonchecker/*
+"
+
+remove_files_from_src () {
+  cd ${top}
+  if ( tar -ztf "${SRC_LOCAL}" | grep -e 'bin/jsonchecker' > /dev/null ); then
+    echo '-- Removing bin/jsonchecker from src:' "${SRC_LOCAL}"
+    gunzip -dc "${SRC_LOCAL}" | tar -vf - --wildcards --delete */bin/jsonchecker* | gzip -9 > "${SRC_LOCAL}.tmp"
+    cp "${SRC_LOCAL}.tmp" "${SRC_LOCAL}"
+    rm "${SRC_LOCAL}.tmp"
+  fi
+}
+
+
+################################
+# Modified from cmake.cygclass/src_install (cmake)
+src_install() {
+        remove_files_from_src
+
+        cd ${B}
+        if [ -f build.ninja ]
+        then
+                ninja_install
+        else
+                cyginstall
+        fi
+}
+
+################################
+ARCH=noarch
+
+################################
