@@ -1,0 +1,6 @@
+category: Doc Libs
+requires:  
+sdesc: "A fast JSON parser/generator for C++ with both SAX/DOM style (doc)"
+ldesc: "RapidJSON is a fast JSON parser/generator for C++ with both SAX/DOM style API."
+external-source: rapidjson
+test:

@@ -1,0 +1,7 @@
+category: Libs
+build-depends: cygport   pkg-config  cmake  ninja  doxygen
+sdesc: "A fast JSON parser/generator for C++ with both SAX/DOM style API"
+ldesc: "RapidJSON is a fast JSON parser/generator for C++ with both SAX/DOM style API."
+skip:
+test:
+homepage: https://rapidjson.org/
