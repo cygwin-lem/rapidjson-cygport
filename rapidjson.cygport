@@ -1,10 +1,10 @@
 ################################
-inherit cmake ninja python3
+inherit cmake ninja
 
 ################################
 
 NAME=rapidjson
-VERSION=1.1.0p567
+VERSION=1.1.0p577
 RELEASE=1
 
 ################################
@@ -18,7 +18,8 @@ HOMEPAGE="https://rapidjson.org/"
 ################################
 GIT_REPO="https://github.com/Tencent/rapidjson"
 declare -A GIT_DATEHASH_BY_NAME=(
-  # git log --date=iso-strict --format='%cd/%H' -1 v1.1.0
+  # git log --date=iso-strict --format='%cd/%H' -1
+  [1.1.0p577]=2021-01-06T13:43:21+08:00/585042c02ba6350e10fc43df8beee1bc097f4c5f
   [1.1.0p567]=2020-10-13T09:54:06+08:00/0ccdbf364c577803e2a751f5aededce935314313
   [1.1.0]=2016-08-25T15:59:05+08:00/f54b0e47a08782a6131cc3d60f94d038fa6e0a51
 )
@@ -58,8 +59,6 @@ BUILD_REQUIRES="\
   cmake\
   ninja\
   doxygen\
-  python3-devel\
-  python38-devel\
 "
 
 ################################
